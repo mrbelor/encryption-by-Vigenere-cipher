@@ -84,7 +84,7 @@ def coding(inp, square, mode = 'cript'):
 
 
 if __name__ == '__main__':
-	alfabet_str = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя!?,. abcdefghijklmnopqrstuvwxyz123456789'
+	alfabet_str = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя!?,. abcdefghijklmnopqrstuvwxyz1234567890'
 	alfabet = list(alfabet_str)
 	alfabet_small = ["а","б","в","г","д"]
 

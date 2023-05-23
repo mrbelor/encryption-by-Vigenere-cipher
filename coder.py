@@ -2,6 +2,9 @@ import os
 KEY = None
 IP = None
 PORT = None
+alfabet_str = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя!?,. abcdefghijklmnopqrstuvwxyz1234567890'
+alfabet = list(alfabet_str)
+alfabet_small = ["а","б","в","г","д"]
 
 def path(text):
 	path_to_file = os.path.abspath(__file__)
@@ -95,10 +98,7 @@ def coding(inp, square, mode = 'cript'):
 
 
 if __name__ == '__main__':
-	alfabet_str = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя!?,. abcdefghijklmnopqrstuvwxyz1234567890'
-	alfabet = list(alfabet_str)
-	alfabet_small = ["а","б","в","г","д"]
-
+	
 	square = visener_square(alfabet)
 
 	setting()

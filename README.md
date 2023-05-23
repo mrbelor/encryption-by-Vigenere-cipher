@@ -1,2 +1,2 @@
-open the "crypto.py" file\n
+open the "crypto.py" file
 only works

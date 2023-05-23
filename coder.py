@@ -1,6 +1,7 @@
 import os
 KEY = None
 IP = None
+PORT = None
 
 def path(text):
 	path_to_file = os.path.abspath(__file__)
@@ -8,11 +9,11 @@ def path(text):
 	return path_to_file[:-len(filename)] + text
 
 def setting():
-	global KEY, IP
+	global KEY, IP, PORT
 	# создание файла настроек при отсутствии
 	if not os.path.isfile(path("settings.txt")):
 		with open(path("settings.txt"), "w", encoding="utf-8") as file:
-			file.write("key:defaultkey\nip:localhost")
+			file.write("key:defaultkey\nip:localhost\nport:10001")
 
 	# чтиение и проверка настроек
 	with open(path("settings.txt"), "r") as file:
@@ -30,8 +31,18 @@ def setting():
 			lines[1] = 'ip:localhost'
 			IP = 'localhost'
 		else:
-			IP = lines[1][3:]
+			IP = lines[1][3:-1]
 			IP = IP.lower()
+
+		if lines[2][:5] != "port:":
+			lines[2] = 'port:10001'
+			PORT = 10001
+		else:
+			try:
+				PORT = int(lines[2][5:])
+			except:
+				print('в порте есть буквы!')
+
 	# перезапись настроек
 	with open(path("settings.txt"), "w") as rfile:
 		rfile.writelines(lines)

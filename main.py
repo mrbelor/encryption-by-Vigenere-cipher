@@ -1,72 +1,78 @@
-import os, socket
+import socket, coder, sys, time
 
+'''
+from coder import setting
+setting()
+from coder import *
+'''
+coder.setting()
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # создание сокета
+#print(coder.KEY)
 
-sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1) # насторйка сокета отключение алгоритма нейгла (упаковки данных в пакеты)
+# specify the IP address and port number to use
+#coder.IP
+#coder.PORT
 
-try:
-    sock.connect(("26.26.207.166", 10001)) # IP, Port
-    print("Подключён к серверу")
-except:
-    print("Не удалось подключиться к серверу")
-    input('press any key . . .')
-    sys.exit()
+# create a socket object
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1) # насторйка сокета отключение алгоритма нейгла (упаковки данных в пакеты)
 
-# функции --------------------------------------
-def pack(obj):
-    if type(obj) == str:
+HOST = False if coder.IP.isdigit() else True
+HOST = False
+opponent = None
 
-        detect = 0 # можно писать или нет
-        result = ""
-        x = obj[::-1] # разворот строки
+if HOST:
+    # bind the socket to the specified IP address and port number
+    s.bind((coder.IP, coder.PORT))
 
-        j = 0
-        if obj.find(']]') == -1  or obj.find('[[') == -1:
-            for i in x:
-                if i == ']':
-                    detect = True
+    s.setblocking(0) # без задержки, без ожиданий
 
-                elif i == '[':
-                    detect = False
+    # listen for incoming connections
+    s.listen(1)
 
-                if detect:
-                    result = i + result # прибавление спереди (мы же с конца прокручиваем)
-                elif result:
-                    return eval('['+result)
+while True:
 
+    if not opponent:
+        if HOST:
+            # проверка, на подключение
+            try:
+                opponent_socket, opponent_ip = s.accept() # перенаправление подключившегося на новый сокет
+                print("Новое подключение:", opponent_ip)
+                opponent_socket.setblocking(0)
+                opponent = [opponent_socket, opponent_ip, 0]
+            except:
+                print("Нет подключений")
+                time.sleep(3)
         else:
-            for i in x:
-                if i == ']' and j+1<len(x) and x[j+1] == ']':
-                    detect = True
+            # если не localhost, то подключаемся по ip
+            try:
+                s.connect((coder.IP, coder.PORT)) # IP, Port
+                print("Подключён к", coder.IP, coder.PORT)
+                opponent = [s, coder.IP, 0]
+            except Exception as e:
+                print("Не удалось подключиться к серверу")
+                print("Ошибка:\n"+ str(e))
+                input('Попробовать ещё раз')
 
-                elif i == '[' and j+1<len(x) and x[j+1] == '[':
-                    detect = False
-
-
-                if detect:
-                    result = i + result # прибавление спереди (мы же с конца прокручиваем)
-                elif result:
-                    return eval('[['+result)
-                    
-                j += 1
-        
-        return None
-
-    elif  type(obj) == list:
-        obj = str(obj)
-        return obj
     else:
-        return None # <- так правильнее
-
-
-def path(text):
-    path_to_file = os.path.abspath(__file__)
-    filename = os.path.basename(path_to_file)
-    
-    return path_to_file[:-len(filename)] + text
-
-
-
-humans = [] # подключённые игроки
-
+        
+        try:
+            data = opponent[0].recv(1024) # принятие информации
+            data = data.decode() # декодирование
+            print("opponent:", data) # логи
+        except:
+            pass
+        
+        try:
+            data = 'message '+str(opponent[2])
+            print("you:", data) # логи
+            data = data.encode()
+            opponent[0].send(data)
+            opponent[2] = 0
+            time.sleep(3)
+        except:
+            opponent[2] += 1 # если не получается отправить, + в счётчик ошибок
+            if opponent[2] >= 5: # если много ошибок - отключение
+                print(f"{opponent[1]}\nopponent отключился")
+                opponent[0].close() # закрытие сокета
+                opponent = None
